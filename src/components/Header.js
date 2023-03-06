@@ -6,7 +6,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto h-[80px] flex items-center justify-between">
         <img src={Logo} className="w-[140x] h-[42px]" alt="" />
 
-        <div className="text-white space-x-4">
+        <div className="text-white space-x-4 md:block hidden">
           <a className="hover:text-orange-600" href="/order">
             Order
           </a>

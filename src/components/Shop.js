@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Cart from "./Cart";
 import Product from "./Product";
-
+import { addToDb, getStoredCart } from "../utilities/fakedb";
 const Shop = () => {
   const [producrts, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
@@ -11,16 +11,41 @@ const Shop = () => {
       .then((data) => setProducts(data));
   }, []);
 
+  useEffect(() => {
+    const storedCart = getStoredCart();
+    const savedCart = [];
+    for (const id in storedCart) {
+      const addedProduct = producrts.find((producrt) => producrt.id === id);
+      if (addedProduct) {
+        const quantity = storedCart[id];
+        addedProduct.quantity = quantity;
+        savedCart.push(addedProduct);
+      }
+    }
+    setCart(savedCart);
+  }, [producrts]);
+
   //   handle click add to cart button
-  const handleProductClick = (product) => {
+  const handleProductClick = (selectedProduct) => {
     // console.log(product);
-    const newCart = [...cart, product];
+    let newCart = [];
+    const exists = cart.find((producrt) => producrt.id === selectedProduct.id);
+    if (!exists) {
+      selectedProduct.quantity = 1;
+      newCart = [...cart, selectedProduct];
+    } else {
+      const rest = cart.filter(producrt => producrt.id  !== selectedProduct.id);
+      exists.quantity = exists.quantity + 1;
+      newCart = [...rest, exists]
+    }
+
     setCart(newCart);
+    addToDb(selectedProduct.id);
   };
   return (
     <section>
-      <div className="grid grid-cols-6 max-w-7xl mx-auto mt-10">
-        <div className="col-span-5 grid lg:grid-cols-3 md:grid-cols-2 gap-[45px]">
+      <div className="grid md:grid-cols-6 max-w-7xl mx-auto mt-10">
+        <div className="col-span-4 grid lg:grid-cols-3 md:grid-cols-2 gap-5">
           {producrts.map((product) => (
             <Product
               key={product.id}
@@ -31,7 +56,7 @@ const Shop = () => {
         </div>
 
         {/* this is order section */}
-        <div className="col-span-1">
+        <div className="md:col-span-2 ">
           <Cart cart={cart} />
         </div>
       </div>
